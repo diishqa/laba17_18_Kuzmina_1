@@ -75,8 +75,9 @@ namespace laba17_18_Kuzmina_2
         {
             try
             {
-                string query = @"SELECT a.Name FROM Animal a
-                                INNER JOIN ZooAnimal za ON a.Id = za.AnimalId WHERE za.ZooId = @ZooId";
+                string query = @"SELECT a.Id, a.Name FROM Animal a
+                 INNER JOIN ZooAnimal za ON a.Id = za.AnimalId
+                 WHERE za.ZooId = @ZooId";
                 SqlCommand SqlCommand = new SqlCommand(query, sqlConnection);
                 SqlCommand.Parameters.AddWithValue("@ZooId", ZooListBox.SelectedValue);
                 SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(SqlCommand);
@@ -120,6 +121,7 @@ namespace laba17_18_Kuzmina_2
         {
             try
             {
+                sqlConnection.Open();
                 string query = "delete from Zoo where id = @ZooId";
                 SqlCommand sqlCommand = new SqlCommand(query, sqlConnection);
                 sqlCommand.Parameters.AddWithValue("@ZooId", ZooListBox.SelectedValue);
@@ -145,7 +147,8 @@ namespace laba17_18_Kuzmina_2
         {
             try
             {
-                string query = "insert into Zoo values (@Location)";
+                sqlConnection.Open();
+                string query = "insert into Zoo (Location) values (@Location)";
                 SqlCommand sqlCommand = new SqlCommand(query, sqlConnection);
                 sqlCommand.Parameters.AddWithValue("@Location", myTextBox.Text);
                 sqlCommand.ExecuteScalar();
@@ -170,11 +173,12 @@ namespace laba17_18_Kuzmina_2
         {
             try
             {
-                string query = "insert into ZooAnimal values (@ZooId, @AnimalId)";
+                sqlConnection.Open();
+                string query = "INSERT INTO ZooAnimal (ZooID, AnimalID) VALUES (@ZooId, @AnimalId)";
                 SqlCommand sqlCommand = new SqlCommand(query, sqlConnection);
                 sqlCommand.Parameters.AddWithValue("@ZooId", ZooListBox.SelectedValue);
                 sqlCommand.Parameters.AddWithValue("@AnimalId", listAllAnimals.SelectedValue);
-                sqlCommand.ExecuteScalar();
+                sqlCommand.ExecuteNonQuery();
             }
             catch (Exception ex)
             {
@@ -186,6 +190,75 @@ namespace laba17_18_Kuzmina_2
                 ShowAssociatedAnimals();
             }
         }
+
+
+
+        private void AddAnimal_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                sqlConnection.Open();
+                string query = "INSERT INTO Animal (Name) VALUES (@Name)";
+                SqlCommand sqlCommand = new SqlCommand(query, sqlConnection);
+                sqlCommand.Parameters.AddWithValue("@Name", myTextBox.Text);
+                sqlCommand.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+            finally
+            {
+                sqlConnection.Close();
+                ShowAllAnimals();
+            }
+        }
+
+
+        private void DeleteAnimal_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                sqlConnection.Open();
+                string query = "DELETE FROM Animal WHERE Id = @AnimalId";
+                SqlCommand sqlCommand = new SqlCommand(query, sqlConnection);
+                sqlCommand.Parameters.AddWithValue("@AnimalId", listAllAnimals.SelectedValue);
+                sqlCommand.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+            finally
+            {
+                sqlConnection.Close();
+                ShowAllAnimals();
+                ShowAssociatedAnimals();
+            }
+        }
+
+        private void RemoveAnimalFromZoo_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                sqlConnection.Open();
+                string query = "DELETE FROM ZooAnimal WHERE AnimalID = @AnimalId AND ZooID = @ZooId";
+                SqlCommand sqlCommand = new SqlCommand(query, sqlConnection);
+                sqlCommand.Parameters.AddWithValue("@AnimalId", listAssociatedAnimals.SelectedValue);
+                sqlCommand.Parameters.AddWithValue("@ZooId", ZooListBox.SelectedValue);
+                sqlCommand.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+            finally
+            {
+                sqlConnection.Close();
+                ShowAssociatedAnimals();
+            }
+        }
+
     }
 }
 
